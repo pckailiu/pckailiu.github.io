@@ -1,0 +1,165 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>page1</title>
+
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+
+    <link rel="stylesheet" href="css/css01.css" />
+    <link rel="stylesheet" href="css/css02.css" />
+    <link rel="stylesheet" href="css/css03.css" />
+    <link rel="stylesheet" href="css/css_menu.css" />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.19/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.19/"></script>
+
+
+    <script>
+        require([
+            "esri/config",
+            "esri/Map",/*引用地图类*/
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/Graphic",
+            "esri/layers/GeoJSONLayer",
+            "esri/geometry/geometryEngine"
+
+        ], function (/*参数位置要和引用类的顺序一致*/
+            esriConfig,
+            Map,
+            MapView,
+            FeatureLayer,
+                     Graphic,
+                     GeoJSONLayer,
+                     geometryEngine
+
+        ) {
+            esriConfig.apiKey = "AAPK56e3ac027f044c4089d8ceec232fc05dYaOuzVRzm8tMRqvzOvDvIEevbqJ85yppn9PacU6cy4duurJrVK9wo_8BcWO8i8bi";
+
+            /*新建一个地图*/
+            const map = new Map({
+                basemap: "arcgis-navigation",/*地图底图*/
+                ground: "world-elevation"
+                //basemap: "oceans"
+            });
+
+            //*************************添加图层*************************************
+            // Trailheads Point feature layer
+            var featureLayer01 = new FeatureLayer({
+              url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Earthquakes_Since1970/FeatureServer/0",
+              popupTemplate:{
+                title:"{Date_}{Name}地震",
+                content:"地震震级为里氏{magnitude}级"}
+            });
+
+            // Trailheads Line feature layer
+            var featureLayer02 = new FeatureLayer({
+                url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer"
+            });
+
+            // Trailheads Polygon feature layer
+            var featureLayer03 = new FeatureLayer({
+              url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Hurricanes/MapServer/",
+              popupTemplate:{
+                title:"该阶段飓风风速",
+                content:"飓风风速为{WINDSPEED}m/s"}
+            });
+
+
+            document.getElementById("AddPoint").addEventListener("click", function () {
+                map.add(featureLayer01);
+            });
+
+            document.getElementById("AddLine").addEventListener("click", function () {
+                map.add(featureLayer02);
+            });
+
+            document.getElementById("AddPolygon").addEventListener("click", function () {
+                map.add(featureLayer03);
+            });
+
+            /*新建一个地图视图*/
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [114.71511, 30.09042],/*地图中心的经纬度坐标*/
+                zoom: 6/*地图缩放级别*/
+            });
+
+
+            //*************************移除图层*************************************
+            document.getElementById("RemovePoint").addEventListener("click", function () {
+                map.remove(featureLayer01);
+            });
+
+            document.getElementById("RemoveLine").addEventListener("click", function () {
+                view.map.remove(featureLayer02);
+            });
+
+            document.getElementById("RemovePolygon").addEventListener("click", function () {
+                view.map.remove(geojsonlayer);
+            });
+
+            //*************************计算图层数量*************************************
+            view.map.allLayers.on("change", function (event) {
+                var num = event.target.length - 2;
+                document.getElementById("Layers").textContent = "Layers： " + num;
+            });
+
+        });
+    </script>
+
+</head>
+
+<body>
+
+    <!--******************************************************侧栏切换菜单*****************************************************************-->
+    <ul>
+
+
+        <li>
+            <a class="entypo-link" href="LinkMap.html"></a> <span>page3</span>
+        </li>
+
+        <li>
+            <a class="entypo-menu" href="LayerSwipe.html"></a> <span>page2</span>
+        </li>
+    </ul>
+
+
+    <div id="viewDiv"></div>
+    <div id="LayerBox">
+        <p>世界自然灾害分布</p>
+        <div id="SingleBox">
+            <a>&nbsp;&nbsp;地震灾害分布</a>
+            <div id="AddPoint" class="button_Add">√</div>
+            <div id="RemovePoint" class="button_Remove">×</div>
+        </div>
+        <div id="SingleBox">
+            <a>&nbsp;&nbsp;野火灾害分布</a>
+            <div id="AddLine" class="button_Add">√</div>
+            <div id="RemoveLine" class="button_Remove">×</div>
+        </div>
+        <div id="SingleBox">
+            <a>&nbsp;&nbsp;飓风灾害分布</a>
+            <div id="AddPolygon" class="button_Add">√</div>
+            <div id="RemovePolygon" class="button_Remove">×</div>
+        </div>
+        <div id="Layers">
+        </div>
+
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,205 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>page3</title>
+    <link rel="stylesheet" href="css/css03.css" />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.10/esri/css/main.css">
+    <link rel="stylesheet" href="css/css_menu.css" />
+  <script type="module" src="https://jsdev.arcgis.com/calcite-components/1.0.0-beta.76/calcite.esm.js"></script>
+  <script nomodule="" src="https://jsdev.arcgis.com/calcite-components/1.0.0-beta.76/calcite.js"></script>
+    <script src="https://js.arcgis.com/4.23/"></script>
+
+
+    <script>
+        var map01;
+        var map02;
+        var min;
+        var popmin;
+        require([
+            "esri/Map",
+          "esri/layers/GeoJSONLayer",
+          "esri/views/MapView","esri/views/layers/support/FeatureEffect","esri/layers/IntegratedMeshLayer",
+          "esri/layers/FeatureLayer",
+          "esri/renderers/HeatmapRenderer"
+        ], function (Map, GeoJSONLayer, MapView,FeatureEffect,IntegratedMeshLayer, FeatureLayer, HeatmapRenderer) {
+            //**********************************************功能：swip map**********************************************************
+          //esriConfig.apiKey = "AAPKd74da932b0b443c99fb257a1dedbac73j6eRjSQrRBL026xj4eQq6Qume6HP14Kwuw7ML0GB-dh_bDpza7wncWjEcNxZPfKV";
+          //创建json图层
+          const url =
+            "https://cxqttkl.github.io/web4gis15/china_simplify.json";
+
+          // Paste the url into a browser's address bar to download and view the attributes
+          // in the GeoJSON file.
+
+
+          const geojsonLayer01 = new GeoJSONLayer({
+            url: url
+          });
+
+          //创建render
+          const colorStops = [
+            { ratio: 0 / 12, color: "rgba(25, 43, 51, 0.6)" },
+            { ratio: 2 / 12, color: "rgba(30, 140, 160, 1)" },
+            { ratio: 3 / 12, color: "rgba(58, 165, 140, 1)" },
+            { ratio: 4 / 12, color: "rgba(64, 184, 156, 1)" },
+            { ratio: 5 / 12, color: "rgba(68, 199, 168, 1)" },
+            { ratio: 6 / 12, color: "rgba(73, 214, 181, 1)" },
+            { ratio: 7 / 12, color: "rgba(78, 230, 194, 1)" },
+            { ratio: 8 / 12, color: "rgba(83, 245, 207, 1)" },
+            { ratio: 9 / 12, color: "rgba(85, 250, 211, 1)" },
+            { ratio: 10 / 12, color: "rgba(102, 255, 219, 1)" },
+            { ratio: 11 / 12, color: "rgba(121, 237, 210, 1)" },
+            { ratio: 12 / 12, color: "rgba(158, 255, 233, 1)" }
+          ];
+
+          const heatmapRenderer = new HeatmapRenderer({
+            colorStops: colorStops,
+            referenceScale: null,
+            maxPixelIntensity: 50,
+            blurRadius: 12,
+            minPixelIntensity: 0
+          });
+          const incidentsLayer = new FeatureLayer({
+            url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Earthquakes_Since1970/FeatureServer/0",
+            opacity: 0.75,
+            renderer: heatmapRenderer
+          });
+            var map01 = new Map({
+                basemap: "streets",
+                layers:[geojsonLayer01]
+
+            });
+
+            var view01 = new MapView({
+                container: "viewDiv01",
+                map: map01,
+                center: [116.40, 39.90],
+                zoom: 3
+            });
+
+            var map02 = new Map({
+                basemap: "hybrid",
+                layers:[incidentsLayer]
+            });
+
+            var view02 = new MapView({
+                container: "viewDiv02",
+                map: map02,
+                center: [116.40, 39.90],
+                zoom: 3
+            });
+
+
+            view01.on(["pointer-down", "pointer-move"], function (evt) {
+                LinkMap02();
+            });
+
+            function LinkMap02() {
+                view02.zoom = view01.zoom;
+                view02.center = view01.center;
+            }
+
+            view02.on(["pointer-down", "pointer-move"], function (evt) {
+                LinkMap01();
+            });
+
+            function LinkMap01() {
+                view01.zoom = view02.zoom;
+                view01.center = view02.center;
+
+            }
+
+
+
+            popmin = document.getElementById("min");
+
+            popmin.addEventListener("change", function () {
+              min = popmin.value;
+
+            })
+          document.getElementById("submit").addEventListener("click", function() {
+          view01.whenLayerView(geojsonLayer01).then(
+            function(evt){
+              const effect = new FeatureEffect({
+                filter:{
+                  where: "pop2000 >="+min
+                },
+                includedEffect: "bloom(150%, 1px, 0.2) saturate(200%)",
+                excludedEffect: "blur(1px) brightness(65%)"
+              });
+              evt.effect = effect;
+
+            }
+          );
+
+          view02.whenLayerView(geojsonLayer02).then(
+            function(evt){
+              alert("min="+min)
+              const effect = new FeatureEffect({
+                filter:{
+                  where: "pop2000 >="+min
+                },
+                includedEffect: "bloom(150%, 1px, 0.2) saturate(200%)",
+                excludedEffect: "blur(1px) brightness(65%)"
+              });
+              evt.effect = effect;
+
+            }
+          );});
+
+
+
+
+          let promptStaticScaleText = true;
+
+          function toggleHeatmapMode() {
+            if (heatmapRenderer.referenceScale) {
+              heatmapRenderer.referenceScale = null;
+            } else {
+              heatmapRenderer.referenceScale = view.scale;
+            }
+          }
+
+          const promptText = {
+            addStaticScale: "Static reference scale",
+            removeScale: "Remove reference scale"
+          };
+
+          const toggleModeButton = document.getElementById("toggleModeButton");
+          toggleModeButton.innerHTML = promptText.addStaticScale;
+
+          toggleModeButton.addEventListener("click", () => {
+            promptStaticScaleText = !promptStaticScaleText;
+            if (promptStaticScaleText) {
+              toggleModeButton.innerHTML = promptText.addStaticScale;
+              toggleHeatmapMode();
+            } else {
+              toggleModeButton.innerHTML = promptText.removeScale;
+              toggleHeatmapMode();
+            }
+          });
+        });
+    </script>
+</head>
+
+<body>
+    <ul>
+        <li>
+            <a class="entypo-star" href="AddLayer.html"></a> <span>page1</span>
+        </li>
+
+        <li>
+            <a class="entypo-menu" href="LayerSwipe.html"></a> <span>page2</span>
+        </li>
+    </ul>
+    <input id = "min" type="text">
+
+    <button id = "submit">筛选</button>
+    <div id="viewDiv01" ></div>
+    <div id="viewDiv02"></div>
+
+</body>
+
+</html>

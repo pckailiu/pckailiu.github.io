@@ -1,0 +1,155 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>page2</title>
+    <link rel="stylesheet" href="css/css01.css" />
+  <link rel="stylesheet" href="css/css02.css" />
+    <link rel="stylesheet" href="css/css04.css" />
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.10/esri/css/main.css">
+    <link rel="stylesheet" href="css/css_menu.css" />
+    <script src="https://js.arcgis.com/4.23/"></script>
+
+    <script>
+      require([
+        "esri/config",
+        "esri/Map",/*引用地图类*/
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/Graphic",
+        "esri/layers/GeoJSONLayer",
+        "esri/geometry/geometryEngine"
+
+      ], function (/*参数位置要和引用类的顺序一致*/
+                   esriConfig,Map,MapView,FeatureLayer,
+                   Graphic,
+                   GeoJSONLayer,
+                   geometryEngine
+
+      ){
+            //**********************************************功能：swip map**********************************************************
+            var map01 = new Map({
+                basemap: "streets"
+            });
+
+            var view = new MapView({
+                container: "viewDiv01",
+                map: map01,
+                center: [116.40, 39.90],
+                zoom: 3
+            });
+
+            var map02 = new Map({
+                basemap: "gray"
+            });
+
+            var view = new MapView({
+                container: "viewDiv02",
+                map: map02,
+                center: [116.40, 39.90],
+                zoom: 3
+            });
+
+
+
+
+      var featureLayer01 = new FeatureLayer({
+        url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Earthquakes_Since1970/FeatureServer/0",
+        popupTemplate:{
+          title:"{Date_}{Name}地震",
+          content:"地震震级为里氏{magnitude}级"}
+      });
+
+      // Trailheads Line feature layer
+      var featureLayer02 = new FeatureLayer({
+        url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer"
+      });
+
+      // Trailheads Polygon feature layer
+      var featureLayer03 = new FeatureLayer({
+        url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Hurricanes/MapServer/",
+        popupTemplate:{
+          title:"该阶段飓风风速",
+          content:"飓风风速为{WINDSPEED}m/s"}
+      });
+
+      document.getElementById("AddPoint").addEventListener("click", function () {
+        //map01.layers.clear();
+        map01.layers=[featureLayer01];
+      });
+
+      document.getElementById("AddLine").addEventListener("click", function () {
+        map01.layers=[featureLayer02];
+      });
+
+      document.getElementById("AddPolygon").addEventListener("click", function () {
+        map01.layers=[featureLayer03];
+      });
+      document.getElementById("RemovePoint").addEventListener("click", function () {
+        map02.layers=[featureLayer01];
+      });
+
+      document.getElementById("RemoveLine").addEventListener("click", function () {
+        map02.layers=[featureLayer02];
+      });
+
+      document.getElementById("RemovePolygon").addEventListener("click", function () {
+        map02.layers=[featureLayer03];
+      });
+
+
+
+
+      });function SwipeMap() {
+        console.log(event.clientX);
+        //鼠标屏幕x坐标等于上层地图宽度
+        document.getElementById("viewDiv02").style.clip = "rect(0px," + event.clientX + "px,768px,0px)";}
+    </script>
+</head>
+
+<body>
+    <ul>
+        
+
+        <li>
+            <a class="entypo-newspaper" href="AddLayer.html"></a> <span>page1</span>
+        </li>
+
+        <li>
+            <a class="entypo-link" href="LinkMap.html"></a> <span>page3</span>
+        </li>
+
+    </ul>
+    <div id="LayerBox">
+      <p>世界自然灾害分布</p>
+      <div id="SingleBox">
+        <a>&nbsp;&nbsp;地震灾害分布</a>
+        <div id="AddPoint" class="button_Add">R</div>
+        <div id="RemovePoint" class="button_Remove">L</div>
+      </div>
+      <div id="SingleBox">
+        <a>&nbsp;&nbsp;野火灾害分布</a>
+        <div id="AddLine" class="button_Add">R</div>
+        <div id="RemoveLine" class="button_Remove">L</div>
+      </div>
+      <div id="SingleBox">
+        <a>&nbsp;&nbsp;飓风灾害分布</a>
+        <div id="AddPolygon" class="button_Add">R</div>
+        <div id="RemovePolygon" class="button_Remove">L</div>
+      </div>
+      <div id="Layers">
+      </div>
+
+
+    </div>
+    <div onmousemove="SwipeMap()">
+        <div id="viewDiv01"></div>
+        <div id="viewDiv02"></div>
+
+    </div>
+
+</body>
+
+</html>
